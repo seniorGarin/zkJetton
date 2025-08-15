@@ -1,0 +1,45 @@
+{
+  "$schema": "https://raw.githubusercontent.com/tact-lang/tact/main/src/config/configSchema.json",
+  "projects": [
+    {
+      "name": "zkJettonMinter",
+      "path": "contracts/zk-jetton-minter.tact",
+      "output": "build\\zkJettonMinter",
+      "options": {
+        "debug": false,
+        "external": false
+      },
+      "mode": "full"
+    }, 
+    {
+      "name": "VerifierRegistration",
+      "path": "contracts/verifiers/verifier_registration.tact",
+      "output": "build\\verifiers",
+      "options": {
+        "debug": false,
+        "external": false
+      },
+      "mode": "full"
+    },
+    {
+      "name": "VerifierMint",
+      "path": "contracts/verifiers/verifier_mint.tact",
+      "output": "build\\verifiers",
+      "options": {
+        "debug": false,
+        "external": false
+      },
+      "mode": "full"
+    },
+    {
+      "name": "VerifierTransfer",
+      "path": "contracts/verifiers/verifier_transfer.tact",
+      "output": "build\\verifiers",
+      "options": {
+        "debug": false,
+        "external": false
+      },
+      "mode": "full"
+    }
+  ]
+}

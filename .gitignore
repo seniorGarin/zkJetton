@@ -1,0 +1,31 @@
+node_modules
+temp
+build
+dist
+.DS_Store
+package.ts
+
+# VS Code
+.vscode/*
+.history/
+*.vsix
+
+# IDEA files
+.idea
+
+# VIM
+Session.vim
+.vim/
+
+# Other private editor folders
+.nvim/
+.emacs/
+.helix/
+
+*.sym
+*.r1cs
+*_js
+*.ptau
+*.zkey
+verification_key.json
+package-lock.json
