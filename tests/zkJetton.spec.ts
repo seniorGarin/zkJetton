@@ -4,9 +4,11 @@ import '@ton/test-utils';
 
 import paillierBigint from 'paillier-bigint';
 
-import { JettonUpdateContent, ZkJettonMinter } from '../build/zkJettonMinter/zkJettonMinter_ZkJettonMinter';
+import { ZkJettonMinter } from '../build/zkJettonMinter/zkJettonMinter_ZkJettonMinter';
 import { ZkJettonWallet } from '../build/zkJettonMinter/zkJettonMinter_ZkJettonWallet';
 import { registration } from './common/registration';
+import { mint } from './common/mint';
+import { transfer } from './common/transfer';
 
 // npx blueprint test zkJetton.spec.ts
 describe('zkJetton', () => {
@@ -34,27 +36,23 @@ describe('zkJetton', () => {
         zkJettonMinter = blockchain.openContract(
             await ZkJettonMinter.fromInit(owner.address, beginCell().endCell(), true),
         );
-
         zkJettonWalletUser1 = blockchain.openContract(
             await ZkJettonWallet.fromInit(user1.address, zkJettonMinter.address, 0n),
         );
-
         zkJettonWalletUser2 = blockchain.openContract(
             await ZkJettonWallet.fromInit(user2.address, zkJettonMinter.address, 0n),
         );
-
-        const msg: JettonUpdateContent = {
-            $$type: 'JettonUpdateContent',
-            queryId: 0n,
-            content: beginCell().endCell(),
-        };
 
         const deployResult = await zkJettonMinter.send(
             owner.getSender(),
             {
                 value: toNano('0.05'),
             },
-            msg,
+            {
+                $$type: 'ZkJettonUpdateContent',
+                queryId: 0n,
+                content: beginCell().endCell(),
+            },
         );
 
         expect(deployResult.transactions).toHaveTransaction({
@@ -65,12 +63,36 @@ describe('zkJetton', () => {
         });
     });
 
-    it('should deploy', async () => {
+    it('zkJettonMinter deploy', async () => {
         expect((await zkJettonMinter.getGetJettonData()).adminAddress.equals(owner.address)).toBe(true);
         expect((await zkJettonMinter.getGetJettonData()).mintable).toBe(true);
     });
 
     it('Registration', async () => {
-        await registration(keys1, zkJettonWalletUser1, user1);
+        await registrationPhase();
     });
+
+    it('Mint', async () => {
+        await registrationPhase();
+        await mintPhase();
+    });
+
+    it('Transfer', async () => {
+        await registrationPhase();
+        await mintPhase();
+        await transferPhase();
+    });
+
+    async function registrationPhase() {
+        await registration(keys1, zkJettonWalletUser1, user1);
+        await registration(keys2, zkJettonWalletUser2, user2);
+    }
+
+    async function mintPhase() {
+        await mint(keys1, owner, user1, zkJettonMinter, zkJettonWalletUser1);
+    }
+
+    async function transferPhase() {
+        await transfer(keys1, keys2, zkJettonWalletUser1, zkJettonWalletUser2, user1, user2);
+    }
 });

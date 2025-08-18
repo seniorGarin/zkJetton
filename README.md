@@ -1,8 +1,6 @@
 # zkJetton
 
-zkJetton is an experimental token standard for the TON blockchain that demonstrates how **zk-SNARKs** can be integrated into token contracts using the **Tact** language.
-
-The token hides both balances and transfer amounts.
+zkJetton is a minimal version of a jetton contract for the TON blockchain that uses zk-SNARKs in **Tact** to provide hidden balances and private transfer amounts.
 
 # How it works
 

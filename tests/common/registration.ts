@@ -12,7 +12,6 @@ import { beginCell, toNano } from '@ton/core';
 
 const wasmPath = path.join(__dirname, '../../circuits/registration/registration_js', 'registration.wasm');
 const zkeyPath = path.join(__dirname, '../../circuits/registration', 'registration_final.zkey');
-const verificationKey = require('../../circuits/registration/verification_key.json');
 
 export async function registration(
     keys: paillierBigint.KeyPair,
@@ -51,6 +50,16 @@ export async function registration(
         to: zkJettonWallet.address,
         success: true,
     });
+
+    const encryptedBalance = (await zkJettonWallet.getGetWalletData()).balance;
+    const balance = keys.privateKey.decrypt(encryptedBalance);
+    expect(balance).toBe(initBalance);
+
+    const pubKey = (await zkJettonWallet.getGetWalletData()).key;
+
+    expect(pubKey.g).toBe(keys.publicKey.g);
+    expect(pubKey.n).toBe(keys.publicKey.n);
+    expect(pubKey.powN2).toBe(keys.publicKey._n2);
 }
 
 export function getRegistrationData(keys: paillierBigint.KeyPair) {
