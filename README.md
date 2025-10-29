@@ -2,6 +2,9 @@
 
 zkJetton is a minimal version of a jetton contract for the TON blockchain that uses zk-SNARKs in **Tact** to provide hidden balances and private transfer amounts.
 
+For more details, see the [Tact documentation on zk-proofs](https://docs.tact-lang.org/cookbook/zk-proofs/).
+
+
 # How it works
 
 * Balances are encrypted using a **homomorphic cryptosystem (Paillier)**.
