@@ -43,7 +43,6 @@ describe('Verifiers', () => {
 
     it('Registration proof', async () => {
         const { proof, publicSignals } = await createRegistrationProof(keys1);
-
         const { pi_a, pi_b, pi_c, pubInputs } = await groth16CompressProof(proof, publicSignals);
 
         expect(
@@ -53,7 +52,7 @@ describe('Verifiers', () => {
                 beginCell().storeBuffer(pi_c).endCell().asSlice(),
                 dictFromInputList(pubInputs),
             ),
-        ).toBe(true);
+        ).toBeTruthy();
 
         const verifyResult = await registration.send(
             user1.getSender(),
@@ -78,7 +77,6 @@ describe('Verifiers', () => {
 
     it('Mint proof', async () => {
         const { proof, publicSignals } = await createMintProof(keys1);
-
         const { pi_a, pi_b, pi_c, pubInputs } = await groth16CompressProof(proof, publicSignals);
 
         expect(
@@ -88,7 +86,7 @@ describe('Verifiers', () => {
                 beginCell().storeBuffer(pi_c).endCell().asSlice(),
                 dictFromInputList(pubInputs),
             ),
-        ).toBe(true);
+        ).toBeTruthy();
 
         const verifyResult = await mint.send(
             user1.getSender(),
@@ -123,7 +121,7 @@ describe('Verifiers', () => {
                 beginCell().storeBuffer(pi_c).endCell().asSlice(),
                 dictFromInputList(pubInputs),
             ),
-        ).toBe(true);
+        ).toBeTruthy();
 
         const verifyResult = await transfer.send(
             user1.getSender(),

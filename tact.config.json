@@ -4,7 +4,7 @@
     {
       "name": "zkJettonMinter",
       "path": "contracts/zk-jetton-minter.tact",
-      "output": "build\\zkJettonMinter",
+      "output": "build/zkJettonMinter",
       "options": {
         "debug": false,
         "external": false
@@ -14,7 +14,7 @@
     {
       "name": "VerifierRegistration",
       "path": "contracts/verifiers/verifier_registration.tact",
-      "output": "build\\verifiers",
+      "output": "build/verifiers",
       "options": {
         "debug": false,
         "external": false
@@ -24,7 +24,7 @@
     {
       "name": "VerifierMint",
       "path": "contracts/verifiers/verifier_mint.tact",
-      "output": "build\\verifiers",
+      "output": "build/verifiers",
       "options": {
         "debug": false,
         "external": false
@@ -34,7 +34,7 @@
     {
       "name": "VerifierTransfer",
       "path": "contracts/verifiers/verifier_transfer.tact",
-      "output": "build\\verifiers",
+      "output": "build/verifiers",
       "options": {
         "debug": false,
         "external": false

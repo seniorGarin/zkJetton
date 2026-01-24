@@ -6,6 +6,16 @@ const P2_SIZE: Int = 96 * 8;
 const ERR_PUBLIC_NOT_PRESENT: Int = 257;
 const ERR_TOO_MANY_PUBLICS: Int = 258;
 const ERR_INDEX_OUT_OF_RANGE: Int = 259;
+const ERR_WRONG_PROOF: Int = 260;
+
+// Safe getter for public inputs
+fun getPub(pubInputs: map<Int as uint32, Int as uint224>, k: Int): Int {
+  let v = pubInputs.get(k);
+  if (v == null) {
+    nativeThrow(ERR_PUBLIC_NOT_PRESENT);
+  }
+  return v!!;
+}
 
 // ASM intrinsics
 asm fun blsG1Add(x: Slice, y: Slice): Slice { BLS_G1_ADD }

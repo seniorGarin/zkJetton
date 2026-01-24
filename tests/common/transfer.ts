@@ -20,13 +20,13 @@ export async function transfer(
     user1: SandboxContract<TreasuryContract>,
     user2: SandboxContract<TreasuryContract>,
 ) {
-    const encryptedBalance1Befor = (await zkJettonWallet1.getGetWalletData()).balance;
-    const balance1Before = keys1.privateKey.decrypt(encryptedBalance1Befor);
+    const encryptedBalance1Before = (await zkJettonWallet1.getGetWalletData()).balance;
+    const balance1Before = keys1.privateKey.decrypt(encryptedBalance1Before);
 
-    const encryptedBalance2Befor = (await zkJettonWallet2.getGetWalletData()).balance;
-    const balance2Before = keys2.privateKey.decrypt(encryptedBalance2Befor);
+    const encryptedBalance2Before = (await zkJettonWallet2.getGetWalletData()).balance;
+    const balance2Before = keys2.privateKey.decrypt(encryptedBalance2Before);
 
-    const { proof, publicSignals } = await createTransferProof(keys1, keys2, encryptedBalance1Befor);
+    const { proof, publicSignals } = await createTransferProof(keys1, keys2, encryptedBalance1Before);
     const { pi_a, pi_b, pi_c, pubInputs } = await groth16CompressProof(proof, publicSignals);
 
     const verifyResult = await zkJettonWallet1.send(
@@ -51,7 +51,7 @@ export async function transfer(
             beginCell().storeBuffer(pi_c).endCell().asSlice(),
             dictFromInputList(pubInputs),
         ),
-    ).toBe(true);
+    ).toBeTruthy();
 
     expect(verifyResult.transactions).toHaveTransaction({
         from: user1.address,
@@ -97,8 +97,8 @@ export function getTransferData(
     const encryptedSenderValue = senderKeys.publicKey.encrypt(senderKeys.publicKey.n - value, sender_rand_r);
     const encryptedReceiverValue = receiverKeys.publicKey.encrypt(value, receiver_rand_r);
     const senderPubKey = [senderKeys.publicKey.g, sender_rand_r, senderKeys.publicKey.n];
-    const receiverPubKey = [receiverKeys.publicKey.g, receiver_rand_r, receiverKeys.publicKey.n];
-    const senderPrivKey = [senderKeys.privateKey.lambda, senderKeys.privateKey.mu, senderKeys.privateKey.n];
+    const receiverPublicKey = [receiverKeys.publicKey.g, receiver_rand_r, receiverKeys.publicKey.n];
+    const senderPrivateKey = [senderKeys.privateKey.lambda, senderKeys.privateKey.mu, senderKeys.privateKey.n];
 
     return {
         encryptedSenderBalance,
@@ -106,7 +106,7 @@ export function getTransferData(
         encryptedReceiverValue,
         value,
         senderPubKey,
-        receiverPubKey,
-        senderPrivKey,
+        receiverPubKey: receiverPublicKey,
+        senderPrivKey: senderPrivateKey,
     };
 }

@@ -25,14 +25,16 @@ For more details, see the [Tact documentation on zk-proofs](https://docs.tact-la
 ### Registration
 
 ```sh
-circom registration.circom --r1cs --wasm --sym --prime bls12381
+mkdir ./circuits/registration
+cd ./circuits/registration
+circom ../registration.circom --r1cs --wasm --sym --prime bls12381
 
 snarkjs powersoftau new bls12-381 10 pot10_0000.ptau -v
 snarkjs powersoftau contribute pot10_0000.ptau pot10_0001.ptau --name="First contribution" -v -e="some random text"
 snarkjs powersoftau prepare phase2 pot10_0001.ptau pot10_final.ptau -v
 snarkjs groth16 setup registration.r1cs pot10_final.ptau registration_0000.zkey
 snarkjs zkey contribute registration_0000.zkey registration_final.zkey --name="1st Contributor Name" -v -e="some random text"
-snarkjs zkey export verificationkey registration_final.zkey verification_key.json
+snarkjs zkey export verificationkey registration_final.zkey registration_verification_key.json
 
 cd ../..
 
@@ -42,14 +44,16 @@ npx export-ton-verifier ./circuits/registration/registration_final.zkey ./contra
 ### Mint
 
 ```sh
-circom mint.circom --r1cs --wasm --sym --prime bls12381
+mkdir ./circuits/mint
+cd ./circuits/mint
+circom ../mint.circom --r1cs --wasm --sym --prime bls12381
 
 snarkjs powersoftau new bls12-381 10 pot10_0000.ptau -v
 snarkjs powersoftau contribute pot10_0000.ptau pot10_0001.ptau --name="First contribution" -v -e="some random text"
 snarkjs powersoftau prepare phase2 pot10_0001.ptau pot10_final.ptau -v
 snarkjs groth16 setup mint.r1cs pot10_final.ptau mint_0000.zkey
 snarkjs zkey contribute mint_0000.zkey mint_final.zkey --name="1st Contributor Name" -v -e="some random text"
-snarkjs zkey export verificationkey mint_final.zkey verification_key.json
+snarkjs zkey export verificationkey mint_final.zkey mint_verification_key.json
 
 cd ../..
 
@@ -59,18 +63,20 @@ npx export-ton-verifier ./circuits/mint/mint_final.zkey ./contracts/verifiers/ve
 ### Transfer
 
 ```sh
-circom transfer.circom --r1cs --wasm --sym --prime bls12381
+mkdir ./circuits/transfer
+cd ./circuits/transfer
+circom ../transfer.circom --r1cs --wasm --sym --prime bls12381
 
 snarkjs powersoftau new bls12-381 10 pot10_0000.ptau -v
 snarkjs powersoftau contribute pot10_0000.ptau pot10_0001.ptau --name="First contribution" -v -e="some random text"
 snarkjs powersoftau prepare phase2 pot10_0001.ptau pot10_final.ptau -v
 snarkjs groth16 setup transfer.r1cs pot10_final.ptau transfer_0000.zkey
 snarkjs zkey contribute transfer_0000.zkey transfer_final.zkey --name="1st Contributor Name" -v -e="some random text"
-snarkjs zkey export verificationkey transfer_final.zkey verification_key.json
+snarkjs zkey export verificationkey transfer_final.zkey transfer_verification_key.json
 
 cd ../..
 
-npx export-ton-verifier ./circuits/Transfer/transfer_final.zkey ./contracts/verifiers/verifier_transfer.tact --tact
+npx export-ton-verifier ./circuits/transfer/transfer_final.zkey ./contracts/verifiers/verifier_transfer.tact --tact
 ```
 
 # Disclaimer

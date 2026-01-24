@@ -1,9 +1,7 @@
 import "./common/messages";
-import "./common/constants";
-import "./common/utils";
 
-import "./verifiers traints/verifier_registration";
-import "./verifiers traints/verifier_transfer";
+import "./verifiers_traits/verifier_registration";
+import "./verifiers_traits/verifier_transfer";
 
 contract ZkJettonWallet with RegistrationVerifier, VerifierTransfer {
     owner: Address;

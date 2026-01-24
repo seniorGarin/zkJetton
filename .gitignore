@@ -13,6 +13,10 @@ package.ts
 # IDEA files
 .idea
 
+# Yarn
+.yarn*
+yarn.lock
+
 # VIM
 Session.vim
 .vim/
@@ -27,5 +31,4 @@ Session.vim
 *_js
 *.ptau
 *.zkey
-verification_key.json
-package-lock.json
+*.json

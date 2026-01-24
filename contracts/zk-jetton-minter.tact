@@ -1,8 +1,7 @@
 import "./zk-jetton-wallet";
 import "./common/messages";
-import "./common/constants";
 
-import "./verifiers traints/verifier_mint";
+import "./verifiers_traits/verifier_mint";
 
 struct ZkJettonMinterState {
     mintable: Bool;

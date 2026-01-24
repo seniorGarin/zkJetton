@@ -1,75 +1,58 @@
 import "@stdlib/deploy";
 
-// ASM intrinsics
-asm fun blsG1Add(x: Slice, y: Slice): Slice { BLS_G1_ADD }
-asm fun blsG1Neg(x: Slice): Slice { BLS_G1_NEG }
-asm fun blsPairing(
-  x1: Slice, y1: Slice,
-  x2: Slice, y2: Slice,
-  x3: Slice, y3: Slice,
-  x4: Slice, y4: Slice,
-  n: Int
-): Int { BLS_PAIRING }
-
-
-asm fun blsG1Multiexp_1(
-  x1: Slice, y1: Int
-  , n: Int
-): Slice { BLS_G1_MULTIEXP }
-
-// Sizes
-const P1_SIZE: Int = 48 * 8;
-const P2_SIZE: Int = 96 * 8;
+import "../common/utils";
 
 // Verification key constants
 const vk_gamma_2: Slice = rawSlice("93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8");
-const vk_delta_2: Slice = rawSlice("98bbf3793ea3eb4bef23f5e76309676d585744e8457e9d9a74c4488aca7419967f9378d8e5eb7536acbaae9ce1101098015739192c6b152766aa0d849aa22a0dc1bd1638a3ea524318183db0b0e2aee4a86d22945ad8fdc543b9b415b0aa7562");
-const vk_alpha_1: Slice = rawSlice("92fb17d1fd23efb235c736d744739b9ee640dd558d3c56b931c79f145aab60851082106002edbd2742cd3d4db4e96279");
-const vk_beta_2 : Slice = rawSlice("a6f244a53f64e2e287dfff636727bbf399b503364581ee62fd2ed5e466697bf7b372cb72e2d7ec8183e9d08d6bc95c41078be41010a5e2a2bece26deeab3360446fe745e674364d1cf1fac5ec857bdeca8103084ceb8f052a73e1e3de682f615");
+const vk_delta_2: Slice = rawSlice("96808edf19fd6f55d9ce0dcc77036abd2bbb52dbcefcacdb1f878a50d0493230a77961d0c2694a18ba4c4dedd71f71210d8eeda551e5d934d0ac625f2444ba121e712c86944a3fd1cea4aa0327ff753ed91c1e74ecf00c3fcce6f56500399cbd");
+const vk_alpha_1: Slice = rawSlice("8a7cbfaf20af8da8436c9331b1c6cedebaca581d4596040424c75e41db40a4a710f7113a6624958faf61f86e89cece6e");
+const vk_beta_2 : Slice = rawSlice("87b24c44db7ab541d53c0655fbb6d6d583a828730ec3661521b502aa0c1606c3f42ade0901adacbdf8d389b3ed9f7d1e092042f35a9383b798ba9c1c1b0d1f62f3e734e15bd6e7685eee325d8394496000a99c397ac9358a23168689bb8046a6");
 
 // IC constants (IC0 — constant term)
-const IC0: Slice = rawSlice("83a57d5cc8e2468cb114e33e6be63ef1ca52b6ed3ddfd98e08dbe4b9d71ecba3238aa87b4534cc661a0601653d2cbac1");
-const IC1: Slice = rawSlice("b5473ea4f3b445f001965961166ac56868a7fd4e8fc0eac23bece60b7719e733e94503ecf749d27fef9b0841fd16bb42");
-
-// Error codes
-const ERR_PUBLIC_NOT_PRESENT: Int = 257;
-const ERR_TOO_MANY_PUBLICS: Int = 258;
-const ERR_INDEX_OUT_OF_RANGE: Int = 259;
-
+const IC0: Slice = rawSlice("8bfa43d728fd0420ddd0ed423a6f4e90404d5c5ca1aa68f552284cd1a8dbc25d2d291addf95e116c3499587b49c28b2f");
+const IC1: Slice = rawSlice("b368cdf3f3dd69636a0baf07f1e76f7613b108193c4ed7522c5409a8fe5ed683b0bfcf6fd1f51fca22f75290b42552a4");
 
 // Message definition
-message Verify {
+message (0x3b3cca17) Verify {
   piA: Slice;
   piB: Slice;
   piC: Slice;
-  pubInputs: map<Int as uint32, Int>;
+  pubInputs: map<Int as uint32, Int as uint224>;
 }
 
 contract Verifier with Deployable {
 
   receive(msg: Verify) {
     let res = self.groth16Verify(msg.piA, msg.piB, msg.piC, msg.pubInputs);
+    nativeThrowUnless(ERR_WRONG_PROOF, res);
   }
 
   fun groth16Verify(
     piA: Slice,
     piB: Slice,
     piC: Slice,
-    pubInputs: map<Int as uint32, Int>
+    pubInputs: map<Int as uint32, Int as uint224>
   ): Bool {
+
+    // --- acc = Σ(v_i * IC_{i+1}) (ONLY public-dependent part) ---
+    let haveAcc: Bool = false;
+    let acc: Slice = IC0; // placeholder until haveAcc=true
+
     // Single batch (no loop and no ic())
-    let cpub: Slice = blsG1Multiexp_1(
-      IC1, pubInputs.get(0)!!
+    acc = blsG1Multiexp_1(
+      IC1, getPub(pubInputs, 0)
       , 1
     );
+    haveAcc = true;
 
-    // Add the constant term
-    cpub = blsG1Add(cpub, IC0);
-
-    // Check that no extra public inputs exist
+    // Cheap guard: reject obvious extras
     nativeThrowIf(ERR_TOO_MANY_PUBLICS, pubInputs.exists(1));
 
-    // Perform pairing check
+
+    // --- cpub = IC0 + acc (IC0 is added exactly once) ---
+    let cpub: Slice = haveAcc ? blsG1Add(acc, IC0) : IC0;
+
+    // Pairing check
     let piANeg: Slice = blsG1Neg(piA);
     let ok: Int = blsPairing(
       cpub,       vk_gamma_2,
@@ -78,6 +61,7 @@ contract Verifier with Deployable {
       vk_alpha_1, vk_beta_2,
       4
     );
+
     return ok != 0;
   }
 
@@ -85,7 +69,7 @@ contract Verifier with Deployable {
     piA: Slice,
     piB: Slice,
     piC: Slice,
-    pubInputs: map<Int as uint32, Int>
+    pubInputs: map<Int as uint32, Int as uint224>
   ): Bool {
     return self.groth16Verify(piA, piB, piC, pubInputs);
   }

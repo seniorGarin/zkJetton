@@ -19,7 +19,6 @@ export async function registration(
     user: SandboxContract<TreasuryContract>,
 ) {
     const { proof, publicSignals } = await createRegistrationProof(keys);
-
     const { pi_a, pi_b, pi_c, pubInputs } = await groth16CompressProof(proof, publicSignals);
 
     const verifyResult = await zkJettonWallet.send(
@@ -43,7 +42,7 @@ export async function registration(
             beginCell().storeBuffer(pi_c).endCell().asSlice(),
             dictFromInputList(pubInputs),
         ),
-    ).toBe(true);
+    ).toBeTruthy();
 
     expect(verifyResult.transactions).toHaveTransaction({
         from: user.address,

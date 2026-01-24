@@ -51,7 +51,7 @@ export async function mint(
             beginCell().storeBuffer(pi_c).endCell().asSlice(),
             dictFromInputList(pubInputs),
         ),
-    ).toBe(true);
+    ).toBeTruthy();
 
     expect(verifyResult.transactions).toHaveTransaction({
         from: owner.address,
