@@ -1,3 +1,5 @@
+import "@stdlib/ownable";
+
 import "./common/messages";
 import "./common/constants";
 import "./common/utils";
@@ -5,7 +7,7 @@ import "./common/utils";
 import "./verifiers traints/verifier_registration";
 import "./verifiers traints/verifier_transfer";
 
-contract ZkJettonWallet with RegistrationVerifier, VerifierTransfer {
+contract ZkJettonWallet with RegistrationVerifier, VerifierTransfer, Ownable {
     owner: Address;
     minter: Address;
     balance: Int as uint224;
@@ -23,6 +25,7 @@ contract ZkJettonWallet with RegistrationVerifier, VerifierTransfer {
     }
 
     receive(msg: Registration) {
+        self.requireOwner();
         require(self.balance == 0, "you are registered");
         if(self.groth16Verify_registration(msg.piA, msg.piB, msg.piC, msg.pubInputs)) {
             self.balance = msg.pubInputs.get(0)!!;
