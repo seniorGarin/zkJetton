@@ -9,6 +9,7 @@ contract ZkJettonWallet with RegistrationVerifier, VerifierTransfer, Ownable {
     owner: Address;
     minter: Address;
     balance: Int as uint224;
+    nonce: Int as uint64;
     key: Key;
 
     init(
@@ -19,6 +20,7 @@ contract ZkJettonWallet with RegistrationVerifier, VerifierTransfer, Ownable {
         self.owner = owner;
         self.minter = minter;
         self.balance = balance;
+        self.nonce = 0;
         self.key = Key{g: 0, n: 0, powN2: 0};
     }
 
@@ -39,10 +41,11 @@ contract ZkJettonWallet with RegistrationVerifier, VerifierTransfer, Ownable {
         forceBasechain(msg.receiver);
         require(sender() == self.owner, "Incorrect sender");
 
-        msg.pubInputs.set(0, self.balance);
+        msg.pubInputs.set(3, self.nonce);
 
         if(self.groth16Verify_transfer(msg.piA, msg.piB, msg.piC, msg.pubInputs)) {
             self.balance = (self.balance * msg.pubInputs.get(1)!!) % self.key.powN2;
+            self.nonce += + 1;
 
             message(MessageParameters {
                 to: contractAddress(initOf ZkJettonWallet(msg.receiver, self.minter, 0)),
@@ -72,11 +75,12 @@ contract ZkJettonWallet with RegistrationVerifier, VerifierTransfer, Ownable {
         // TODO: Design and implement a mechanism for returning the balance.
     }
 
-    get fun get_wallet_data(): ZkJettonWalletData {
+    get fun wallet_data(): ZkJettonWalletData {
         return ZkJettonWalletData {
             balance: self.balance,
             owner: self.owner,
             minter: self.minter,
+            nonce: self.nonce,
             key: self.key,
             code: myCode(),
         };

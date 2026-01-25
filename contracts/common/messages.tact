@@ -9,6 +9,7 @@ struct ZkJettonWalletData {
     owner: Address;
     minter: Address;
     code: Cell;
+    nonce: Int;
     key: Key;
 }
 message(4) ZkJettonUpdateContent {

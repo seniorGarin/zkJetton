@@ -20,13 +20,18 @@ export async function transfer(
     user1: SandboxContract<TreasuryContract>,
     user2: SandboxContract<TreasuryContract>,
 ) {
-    const encryptedBalance1Before = (await zkJettonWallet1.getGetWalletData()).balance;
-    const balance1Before = keys1.privateKey.decrypt(encryptedBalance1Before);
+    const zkJettonWallet1Data = await zkJettonWallet1.getWalletData();
+    const balance1Before = keys1.privateKey.decrypt(zkJettonWallet1Data.balance);
 
-    const encryptedBalance2Before = (await zkJettonWallet2.getGetWalletData()).balance;
-    const balance2Before = keys2.privateKey.decrypt(encryptedBalance2Before);
+    const zkJettonWallet2Data = await zkJettonWallet2.getWalletData();
+    const balance2Before = keys2.privateKey.decrypt(zkJettonWallet2Data.balance);
 
-    const { proof, publicSignals } = await createTransferProof(keys1, keys2, encryptedBalance1Before);
+    const { proof, publicSignals } = await createTransferProof(
+        keys1,
+        keys2,
+        zkJettonWallet1Data.balance,
+        zkJettonWallet1Data.nonce,
+    );
     const { pi_a, pi_b, pi_c, pubInputs } = await groth16CompressProof(proof, publicSignals);
 
     const verifyResult = await zkJettonWallet1.send(
@@ -65,11 +70,11 @@ export async function transfer(
         success: true,
     });
 
-    const encryptedBalance1After = (await zkJettonWallet1.getGetWalletData()).balance;
+    const encryptedBalance1After = (await zkJettonWallet1.getWalletData()).balance;
     const balance1 = keys1.privateKey.decrypt(encryptedBalance1After);
     expect(balance1Before - transferValue).toBe(balance1);
 
-    const encryptedBalance2After = (await zkJettonWallet2.getGetWalletData()).balance;
+    const encryptedBalance2After = (await zkJettonWallet2.getWalletData()).balance;
     const balance2 = keys2.privateKey.decrypt(encryptedBalance2After);
     expect(balance2Before + transferValue).toBe(balance2);
 }
@@ -78,9 +83,10 @@ export async function createTransferProof(
     senderKeys: paillierBigint.KeyPair,
     receiverKeys: paillierBigint.KeyPair,
     encryptedSenderBalance: bigint,
+    receiverNonce: bigint,
 ) {
     return await snarkjs.groth16.fullProve(
-        getTransferData(senderKeys, receiverKeys, encryptedSenderBalance),
+        getTransferData(senderKeys, receiverKeys, encryptedSenderBalance, receiverNonce),
         wasmPath,
         zkeyPath,
     );
@@ -90,6 +96,7 @@ export function getTransferData(
     senderKeys: paillierBigint.KeyPair,
     receiverKeys: paillierBigint.KeyPair,
     encryptedSenderBalance: bigint,
+    receiverNonce: bigint,
 ) {
     const value = transferValue;
     const sender_rand_r = getRandomBigInt(senderKeys.publicKey.n);
@@ -104,6 +111,7 @@ export function getTransferData(
         encryptedSenderBalance,
         encryptedSenderValue,
         encryptedReceiverValue,
+        nonce: receiverNonce,
         value,
         senderPubKey,
         receiverPubKey: receiverPublicKey,

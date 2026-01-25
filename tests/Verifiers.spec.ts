@@ -110,7 +110,7 @@ describe('Verifiers', () => {
     });
 
     it('Transfer proof', async () => {
-        const { proof, publicSignals } = await createTransferProof(keys1, keys2, keys1.publicKey.encrypt(1000n));
+        const { proof, publicSignals } = await createTransferProof(keys1, keys2, keys1.publicKey.encrypt(1000n), 0n);
 
         const { pi_a, pi_b, pi_c, pubInputs } = await groth16CompressProof(proof, publicSignals);
 

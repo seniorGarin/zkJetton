@@ -1,15 +1,15 @@
 import "../common/utils";
 
 const vk_gamma_2_registration: Slice = rawSlice("93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8");
-const vk_delta_2_registration: Slice = rawSlice("ae5fe338e3d0a7a1dab77a32b722f0bd7cc0fe0aab7534306006bdf2d6a00c5ae7e2ba05d12adde515291f110da164380fa9b3d4489314629a8629c497e02e3ce27e6e51cb9bfab923fda5f1af7a759b07889d8d68ef59d488e5fcdf317cdf9a");
-const vk_alpha_1_registration: Slice = rawSlice("85881a93e59021f4808ee2735a329bed9da96293db449ffa86542ad49aef8973ceace02da3f1897bd7279b1cab4f9901");
-const vk_beta_2_registration: Slice = rawSlice("96bb516048601d24c6fb999eb4746181f10faa794c6229b05acd2d88048366a86769b6249e40f3331ee6c360b08bca561582f593626cd740dcb50c4b9dc6b320fa32294e9f11e26657073a3b026a321ab18e5872e352e576035a0ccc657aa127");
+const vk_delta_2_registration: Slice = rawSlice("a52212ab4f4249c5ccfbe0dd9b0c9d243eda22c3609aaf62a0ecf72309c64c683928a591a1b66a881ce13a7aef619afc0f7d818d2399b33677db1e1a7bb7469500b6e7be727d9a11d4be411687a1fac7dec0ccc6eaef36e8f30e5a3bef4fefca");
+const vk_alpha_1_registration: Slice = rawSlice("b93888e7643bf4add921e7a9b81c2dbd37250abc096191ae60c5685d68953ce4f8a1aad6ca25fbe846246ffea167d03f");
+const vk_beta_2_registration: Slice = rawSlice("8d1c5ab60a2fe9c58fb1e6cabf000e5c3c74088920297d290fe37711227fa89ff4d17980fc62b92ac0c5aed47e2c4c1300314a5be5c4ab77c71acf9662bda8b278272792c1c2c7f21b73ab40bae4acf1d450a8a4fef11de57c08ef3ece3086fa");
 
-const IC0_registration: Slice = rawSlice("86757734f9c70839e5b05e4520426ddea0ea2394cd9931124c82e5517af6281b90b15e9e7acf1fb9bf4a2c0784482a0a");
-const IC1_registration: Slice = rawSlice("810d652636cdc8fd1bd846db6d73d42196679119d7cca9e205330e099770153f4be46322bcc3ea344738815d784bbf65");
-const IC2_registration: Slice = rawSlice("a1c26bd1737359050e38bd46a3ec6d1ce4a52e7b8adbb577ac31c3afe70dcedbc7c7cd260c8944a5e16142431dac8708");
-const IC3_registration: Slice = rawSlice("a162537bb6427374add80d99baac385e3762c885582de02c58539f0264f42710dd355ef67675efa81d73b0a88638b58d");
-const IC4_registration: Slice = rawSlice("91bf68a3fca3f46a63934828d7f37e52c272a3d1c1e371e6273991b01499f74dbfd9da04d46f6873e7907005eec3f906");
+const IC0_registration: Slice = rawSlice("965c7293b8a9c826e3ead53ed43ab4947736d64b0e492f676bf8cfedc00fd44b1d00b98fba38d933508ac14ccc5078ea");
+const IC1_registration: Slice = rawSlice("a64deac4cd163548193d7c691c854549b9abeb709a6be86f5268e0f1418db5394594baea71ba7a1da4c3d447ceff2bea");
+const IC2_registration: Slice = rawSlice("b95fa362b928395514d769e110e419b144b7b6d07faf5cea62844d1abcd65cff5a0b005b9736a6cd65770df1f12a9493");
+const IC3_registration: Slice = rawSlice("aff65da7564758d8f61a139f09cbdb01061346790340b8e4b435c8eef874faa8f900be8f944cc89f45be30c8f8d575b4");
+const IC4_registration: Slice = rawSlice("a1f78f76a63160855e9bed5f2734cd15f83910064cff606aefefca900ca27f863ec6a55065617bedcf4dcbc8428a919b");
 
 trait RegistrationVerifier {
     fun groth16Verify_registration(
@@ -36,9 +36,9 @@ trait RegistrationVerifier {
         // Pairing check
         let piANeg: Slice = blsG1Neg(piA);
         let ok: Int = blsPairing(
-        cpub,          vk_gamma_2_registration,
-        piANeg,        piB,
-        piC,           vk_delta_2_registration,
+        cpub,                    vk_gamma_2_registration,
+        piANeg,                  piB,
+        piC,                     vk_delta_2_registration,
         vk_alpha_1_registration, vk_beta_2_registration,
         4
         );

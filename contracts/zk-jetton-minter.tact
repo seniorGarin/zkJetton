@@ -45,7 +45,7 @@ contract ZkJettonMinter(
         };
     }
 
-    get fun get_wallet_address(ownerAddress: Address): Address {
+    get fun wallet_address(ownerAddress: Address): Address {
         return getZkJettonWalletByOwner(ownerAddress);
     }
 }

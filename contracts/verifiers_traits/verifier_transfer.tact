@@ -1,14 +1,15 @@
 import "../common/utils";
 
 const vk_gamma_2_transfer: Slice = rawSlice("93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8");
-const vk_delta_2_transfer: Slice = rawSlice("b898de4384f43d5554d36bdc7df88c4a643e9beb25658f3d15d12c48ec73b4053f43a97da8af4f3e738daaf94009016d08aaf52eb18349d9c569dafd31e74e188cdc0954f9d6b9fcffabfd3a52472a95e488a07d0edd569eded41f57c26f0bc6");
-const vk_alpha_1_transfer: Slice = rawSlice("a48808548c0b83742a15d1a908e4952b5c519f780dbedbe3bb0ed836cf987c69c984af40098ae947e2c53021dd7a4514");
-const vk_beta_2_transfer: Slice = rawSlice("815fb90dfbeb18409011a7af7d8ffd83196adffa274956c22cf958c7941cafc16e7ce1e23adb3615e4340b0f093f86de039ff4ce0636be35c3cd73604bba4418829725c5af44774569dc84e08b1fcceace325c062d963aac7e7c1eea21bafefb");
+const vk_delta_2_transfer: Slice = rawSlice("b753c993ab8fb8b2ccf549b3b693653a4a82df7e668541a5eb856083f522e3bcfe47422f11de42c4656e1df3d2028bd2133de51bd413e49216bd792880fba68ed33e7c1333b626acab8bc89fbc957c11348ffa417517be880922e1b048334a5b");
+const vk_alpha_1_transfer: Slice = rawSlice("b4d02b4745438e2640324c7edfb7d38318585e00a9570c6635fc06faa2dbeee65a73664922633682c8409980f9654e60");
+const vk_beta_2_transfer: Slice = rawSlice("a1d40e23a504e2ea3d4600765ec1af9cc5251871bf877f05e84e2ff4033cd15711cb72bf875921ef8e6eb1b2d53567b21436c8dd39b9afdeaac7a3d603e75153705a899dc10fcd3e08c0f39b23f363b0a83882f985fd10a7972d0b323dd11fcb");
 
-const IC0_transfer: Slice = rawSlice("ac6e48ccf5cd9984485f211bac5c09d6af93a1e598ebbfe8f05a373b26a115e99a603a04876197f7af62eff534dde83f");
-const IC1_transfer: Slice = rawSlice("985be4c3ce7555152209a9683640567a5b1675200e194c625012b04c6d2dc881d7bdc7bc349903825cda8f3c05b11594");
-const IC2_transfer: Slice = rawSlice("b89bbea20b4dd19b56e0b382288577c43c8f43449673815bd58e6e7b4aacf918b6221d3985a3a8f787f3889ab82da8ac");
-const IC3_transfer: Slice = rawSlice("b7f1f249614e089418f57feb3bbe6840ea48ec6ebfbcf657ba3e3abed0bbac98f334728ba8cfd532fe2fa8fad6826923");
+const IC0_transfer: Slice = rawSlice("a0cd9971e048219fd9a6bbd011d2de36e24ea73d57bbdbbb9dc24f4291ddcad10bfc0b81a85d70203283607d0ad92265");
+const IC1_transfer: Slice = rawSlice("821b05a46f903dcc9595016cfefd3866b63d09221bc723723dbeedd539f98e06af56091d8ae12bc9a1bed7a3a9b1984a");
+const IC2_transfer: Slice = rawSlice("950c0c9007bdd92f264f36489312b5f53acf60064014173ebacdac53ede4c311e272af063da3b0d68a8ac908bb018a39");
+const IC3_transfer: Slice = rawSlice("ac2ad0368ea10d4f355272829eb9d7389c76bf09ce0e704b1081fd588179752a72898ba57a1b871526c057f222edcdc3");
+const IC4_transfer: Slice = rawSlice("b2ff6ba8453a6fda1b0e2fffeac73e7770dedd73965544e6ecb0fedeb0c8721a0db3bc947a8a523a1ddbdac0c3d4452c");
 
 trait VerifierTransfer {
     fun groth16Verify_transfer(
@@ -17,29 +18,37 @@ trait VerifierTransfer {
     piC: Slice,
     pubInputs: map<Int as uint32, Int as uint224>
     ): Bool {
-        // --- acc = Σ(v_i * IC_{i+1}) ---
-        let acc: Slice = blsG1Multiexp_3(
+        // --- acc = Σ(v_i * IC_{i+1}) (ONLY public-dependent part) ---
+        let haveAcc: Bool = false;
+        let acc: Slice = IC0_transfer; // placeholder until haveAcc=true
+
+        // Single batch (no loop and no ic())
+        acc = blsG1Multiexp_4(
         IC1_transfer, getPub(pubInputs, 0),
         IC2_transfer, getPub(pubInputs, 1),
         IC3_transfer, getPub(pubInputs, 2),
-        3
+        IC4_transfer, getPub(pubInputs, 3)
+        , 4
         );
+        haveAcc = true;
 
-        // Reject extras
-        nativeThrowIf(ERR_TOO_MANY_PUBLICS, pubInputs.exists(3));
+        // Cheap guard: reject obvious extras
+        nativeThrowIf(ERR_TOO_MANY_PUBLICS, pubInputs.exists(4));
 
-        // cpub = IC0 + acc
-        let cpub: Slice = blsG1Add(acc, IC0_transfer);
 
-        // Pairing check (ТОЧНО ИЗ TransferVerifier.tact)
+        // --- cpub = IC0 + acc (IC0 is added exactly once) ---
+        let cpub: Slice = haveAcc ? blsG1Add(acc, IC0_transfer) : IC0_transfer;
+
+        // Pairing check
         let piANeg: Slice = blsG1Neg(piA);
         let ok: Int = blsPairing(
-        cpub,          vk_gamma_2_transfer,
-        piANeg,        piB,
-        piC,           vk_delta_2_transfer,
+        cpub,       vk_gamma_2_transfer,
+        piANeg,     piB,
+        piC,        vk_delta_2_transfer,
         vk_alpha_1_transfer, vk_beta_2_transfer,
         4
         );
+
         return ok != 0;
     }
 

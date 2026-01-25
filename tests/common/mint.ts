@@ -59,7 +59,7 @@ export async function mint(
         success: true,
     });
 
-    const encryptedBalance = (await zkJettonWallet.getGetWalletData()).balance;
+    const encryptedBalance = (await zkJettonWallet.getWalletData()).balance;
     const balance = keys.privateKey.decrypt(encryptedBalance);
     expect(balance).toBe(mintValue);
 }

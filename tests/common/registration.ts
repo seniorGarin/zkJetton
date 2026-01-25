@@ -50,11 +50,11 @@ export async function registration(
         success: true,
     });
 
-    const encryptedBalance = (await zkJettonWallet.getGetWalletData()).balance;
+    const encryptedBalance = (await zkJettonWallet.getWalletData()).balance;
     const balance = keys.privateKey.decrypt(encryptedBalance);
     expect(balance).toBe(initBalance);
 
-    const pubKey = (await zkJettonWallet.getGetWalletData()).key;
+    const pubKey = (await zkJettonWallet.getWalletData()).key;
 
     expect(pubKey.g).toBe(keys.publicKey.g);
     expect(pubKey.n).toBe(keys.publicKey.n);

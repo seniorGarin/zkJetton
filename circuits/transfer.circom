@@ -6,6 +6,7 @@ template Main() {
 	signal input encryptedSenderBalance;
 	signal input encryptedSenderValue;
 	signal input encryptedReceiverValue;
+	signal input nonce;
 	signal input value;
 
 	// public key: g, rand r, n
@@ -63,7 +64,10 @@ template Main() {
 
 // public data
 component main {
-		public [encryptedSenderBalance,		// in storage
-				encryptedSenderValue, 		// sender calculates + send to transfer function
-				encryptedReceiverValue]		// sender calculates + send to transfer function	
-				} = Main();
+    public [
+        nonce,
+        encryptedSenderBalance,
+        encryptedSenderValue,
+        encryptedReceiverValue
+    ]
+} = Main();
