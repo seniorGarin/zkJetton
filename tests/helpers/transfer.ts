@@ -56,7 +56,7 @@ export async function transfer(
             beginCell().storeBuffer(pi_c).endCell().asSlice(),
             dictFromInputList(pubInputs),
         ),
-    ).toBeTruthy();
+    ).toBe(true);
 
     expect(verifyResult.transactions).toHaveTransaction({
         from: user1.address,
@@ -104,8 +104,8 @@ export function getTransferData(
     const encryptedSenderValue = senderKeys.publicKey.encrypt(senderKeys.publicKey.n - value, sender_rand_r);
     const encryptedReceiverValue = receiverKeys.publicKey.encrypt(value, receiver_rand_r);
     const senderPubKey = [senderKeys.publicKey.g, sender_rand_r, senderKeys.publicKey.n];
-    const receiverPublicKey = [receiverKeys.publicKey.g, receiver_rand_r, receiverKeys.publicKey.n];
-    const senderPrivateKey = [senderKeys.privateKey.lambda, senderKeys.privateKey.mu, senderKeys.privateKey.n];
+    const receiverPubKey = [receiverKeys.publicKey.g, receiver_rand_r, receiverKeys.publicKey.n];
+    const senderPrivKey = [senderKeys.privateKey.lambda, senderKeys.privateKey.mu, senderKeys.privateKey.n];
 
     return {
         encryptedSenderBalance,
@@ -114,7 +114,7 @@ export function getTransferData(
         nonce: receiverNonce,
         value,
         senderPubKey,
-        receiverPubKey: receiverPublicKey,
-        senderPrivKey: senderPrivateKey,
+        receiverPubKey,
+        senderPrivKey,
     };
 }

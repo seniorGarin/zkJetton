@@ -9,9 +9,9 @@ import { Verifier as Registration_Verifier } from '../build/verifiers/VerifierRe
 import { Verifier as Mint_Verifier } from '../build/verifiers/VerifierMint_Verifier';
 import { Verifier as Transfer_Verifier } from '../build/verifiers/VerifierTransfer_Verifier';
 
-import { createRegistrationProof } from './common/registration';
-import { createMintProof } from './common/mint';
-import { createTransferProof } from './common/transfer';
+import { createRegistrationProof } from './helpers/registration';
+import { createMintProof } from './helpers/mint';
+import { createTransferProof } from './helpers/transfer';
 
 // npx blueprint test Verifiers
 describe('Verifiers', () => {

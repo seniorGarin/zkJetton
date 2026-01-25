@@ -6,9 +6,10 @@ import paillierBigint from 'paillier-bigint';
 
 import { ZkJettonMinter } from '../build/zkJettonMinter/zkJettonMinter_ZkJettonMinter';
 import { ZkJettonWallet } from '../build/zkJettonMinter/zkJettonMinter_ZkJettonWallet';
-import { registration } from './common/registration';
-import { mint } from './common/mint';
-import { transfer } from './common/transfer';
+import { registration } from './helpers/registration';
+import { mint } from './helpers/mint';
+import { transfer } from './helpers/transfer';
+import { transferWithBounce } from './helpers/transferWithBounce';
 
 // npx blueprint test zkJetton.spec.ts
 describe('zkJetton', () => {
@@ -23,6 +24,19 @@ describe('zkJetton', () => {
 
     let keys1: paillierBigint.KeyPair;
     let keys2: paillierBigint.KeyPair;
+
+    async function registrationPhase() {
+        await registration(keys1, zkJettonWalletUser1, user1);
+        await registration(keys2, zkJettonWalletUser2, user2);
+    }
+
+    async function mintPhase() {
+        await mint(keys1, owner, user1, zkJettonMinter, zkJettonWalletUser1);
+    }
+
+    async function transferPhase() {
+        await transfer(keys1, keys2, zkJettonWalletUser1, zkJettonWalletUser2, user1, user2);
+    }
 
     beforeEach(async () => {
         blockchain = await Blockchain.create();
@@ -83,16 +97,9 @@ describe('zkJetton', () => {
         await transferPhase();
     });
 
-    async function registrationPhase() {
-        await registration(keys1, zkJettonWalletUser1, user1);
-        await registration(keys2, zkJettonWalletUser2, user2);
-    }
-
-    async function mintPhase() {
-        await mint(keys1, owner, user1, zkJettonMinter, zkJettonWalletUser1);
-    }
-
-    async function transferPhase() {
-        await transfer(keys1, keys2, zkJettonWalletUser1, zkJettonWalletUser2, user1, user2);
-    }
+    it('Transfer bounced reverts balance', async () => {
+        await registrationPhase();
+        await mintPhase();
+        await transferWithBounce(keys1, keys2, zkJettonWalletUser1, user1, blockchain);
+    });
 });

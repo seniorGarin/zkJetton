@@ -51,3 +51,33 @@ asm fun blsG1Multiexp_4(
   , n: Int
 ): Slice { BLS_G1_MULTIEXP }
 
+// Math
+fun modInverse(a: Int, m: Int): Int {
+  let a0 = a % m;
+  require(a0 != 0, "modInverse: zero");
+
+  let t: Int = 0;
+  let newT: Int = 1;
+  let r: Int = m;
+  let newR: Int = a0;
+
+  while (newR != 0) {
+    let q: Int = r / newR;
+
+    let tmpT: Int = t - q * newT;
+    t = newT;
+    newT = tmpT;
+
+    let tmpR: Int = r - q * newR;
+    r = newR;
+    newR = tmpR;
+  }
+
+  require(r == 1, "modInverse: no inverse");
+
+  if (t < 0) {
+    t = t + m;
+  }
+
+  return t;
+}

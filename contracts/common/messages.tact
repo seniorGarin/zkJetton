@@ -5,7 +5,7 @@ struct ZkJettonData {
     jettonWalletCode: Cell;
 }
 struct ZkJettonWalletData {
-    balance: Int;
+    balance: Int as uint224;
     owner: Address;
     minter: Address;
     code: Cell;
@@ -40,6 +40,7 @@ message Registration {
 }
 message ZkJettonTransferInternal {
     amount: Int as uint224;
+    amountRevert: Int as uint224;
     sender: Address
 }
 message Mint {

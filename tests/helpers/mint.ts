@@ -35,6 +35,7 @@ export async function mint(
             mintMessage: {
                 $$type: 'ZkJettonTransferInternal',
                 amount: pubInputs[0],
+                amountRevert: pubInputs[0],
                 sender: zkJettonMinter.address,
             },
             piA: beginCell().storeBuffer(pi_a).endCell().asSlice(),

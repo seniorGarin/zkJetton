@@ -1,6 +1,7 @@
 import "@stdlib/ownable";
 
 import "./common/messages";
+import "./common/utils";
 
 import "./verifiers_traits/verifier_registration";
 import "./verifiers_traits/verifier_transfer";
@@ -43,9 +44,13 @@ contract ZkJettonWallet with RegistrationVerifier, VerifierTransfer, Ownable {
 
         msg.pubInputs.set(3, self.nonce);
 
-        if(self.groth16Verify_transfer(msg.piA, msg.piB, msg.piC, msg.pubInputs)) {
-            self.balance = (self.balance * msg.pubInputs.get(1)!!) % self.key.powN2;
-            self.nonce += + 1;
+        if (self.groth16Verify_transfer(msg.piA, msg.piB, msg.piC, msg.pubInputs)) {
+            let multiplier: Int = msg.pubInputs.get(1)!!;
+            self.balance = (self.balance * multiplier) % self.key.powN2;
+            self.nonce += 1;
+
+            let amount: Int = msg.pubInputs.get(2)!!;
+            let amountRevert: Int = modInverse(multiplier, self.key.powN2);
 
             message(MessageParameters {
                 to: contractAddress(initOf ZkJettonWallet(msg.receiver, self.minter, 0)),
@@ -53,13 +58,14 @@ contract ZkJettonWallet with RegistrationVerifier, VerifierTransfer, Ownable {
                 mode: SendRemainingValue,
                 bounce: true,
                 body: ZkJettonTransferInternal {
-                    amount: msg.pubInputs.get(2)!!,
+                    amount,
+                    amountRevert,
                     sender: self.owner,
                 }.toCell(),
             });
         } else {
             nativeThrow(300); // wrong proof
-        }   
+        }
     }
 
     receive(msg: ZkJettonTransferInternal) {
@@ -72,7 +78,8 @@ contract ZkJettonWallet with RegistrationVerifier, VerifierTransfer, Ownable {
     }
 
     bounced(msg: bounced<ZkJettonTransferInternal>) {
-        // TODO: Design and implement a mechanism for returning the balance.
+        let amountRevert = msg.amountRevert;
+        self.balance = (self.balance * amountRevert) % self.key.powN2;
     }
 
     get fun wallet_data(): ZkJettonWalletData {
