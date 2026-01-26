@@ -36,25 +36,38 @@ message Registration {
     piA: Slice;
     piB: Slice;
     piC: Slice;
-    pubInputs: map<Int as uint32, Int as uint224>;
+    pubInputs: map<Int as uint32, Int as uint256>;
 }
 message ZkJettonTransferInternal {
-    amount: Int as uint224;
     amountRevert: Int as uint224;
+    amount: Int as uint224;
     sender: Address
 }
 message Mint {
     receiver: Address;
     mintMessage: ZkJettonTransferInternal;
+    nonce: Int as uint64;
     piA: Slice;
     piB: Slice;
     piC: Slice;
-    pubInputs: map<Int as uint32, Int as uint224>;
+    pubInputs: map<Int as uint32, Int as uint256>;
 }
 message ZkJettonTransfer {
     receiver: Address;
     piA: Slice;
     piB: Slice;
     piC: Slice;
-    pubInputs: map<Int as uint32, Int as uint224>;
+    pubInputs: map<Int as uint32, Int as uint256>;
+}
+struct ZkJettonMinterState {
+    mintable: Bool;
+    ownerAddress: Address;
+    jettonContent: Cell;
+    jettonWalletCode: Cell;
+    nonce: Int as uint64;
+}
+
+message UpdateMintable {
+    queryId: Int? as uint64;
+    newMintable: Bool;
 }

@@ -1,22 +1,22 @@
 import "../common/utils";
 
 const vk_gamma_2_transfer: Slice = rawSlice("93e02b6052719f607dacd3a088274f65596bd0d09920b61ab5da61bbdc7f5049334cf11213945d57e5ac7d055d042b7e024aa2b2f08f0a91260805272dc51051c6e47ad4fa403b02b4510b647ae3d1770bac0326a805bbefd48056c8c121bdb8");
-const vk_delta_2_transfer: Slice = rawSlice("b753c993ab8fb8b2ccf549b3b693653a4a82df7e668541a5eb856083f522e3bcfe47422f11de42c4656e1df3d2028bd2133de51bd413e49216bd792880fba68ed33e7c1333b626acab8bc89fbc957c11348ffa417517be880922e1b048334a5b");
-const vk_alpha_1_transfer: Slice = rawSlice("b4d02b4745438e2640324c7edfb7d38318585e00a9570c6635fc06faa2dbeee65a73664922633682c8409980f9654e60");
-const vk_beta_2_transfer: Slice = rawSlice("a1d40e23a504e2ea3d4600765ec1af9cc5251871bf877f05e84e2ff4033cd15711cb72bf875921ef8e6eb1b2d53567b21436c8dd39b9afdeaac7a3d603e75153705a899dc10fcd3e08c0f39b23f363b0a83882f985fd10a7972d0b323dd11fcb");
+const vk_delta_2_transfer: Slice = rawSlice("985b68fe8f55f4b2f94bfe7967e8ecf39520ce21761d6b5eac18075e728c0b72f177e2be5027d0e277327ce146f0446117b3af4f7307b057e205f8f4e233eff65baa18d1059eadd6ba9b0ce86e077d9d4df077b79a95108d69da5d63c2ea08c1");
+const vk_alpha_1_transfer: Slice = rawSlice("b591dc99a722a804ce162048674428118a6a72d1f0d62b3f13d7a6364370399730afe49c286efac9861c476c12d6a81b");
+const vk_beta_2_transfer: Slice = rawSlice("a3669812b3382007876278959bcdf51b0c10cb4b8bf11a345e324e91ec2c1b498f74fcb8780438c7df9176f64e2da66e0b52cdd1da07cb53615810359fc34b7b50f5abc67f52c83975f98f30e22e134c30a8a64c0a079ae90074d330538532b6");
 
-const IC0_transfer: Slice = rawSlice("a0cd9971e048219fd9a6bbd011d2de36e24ea73d57bbdbbb9dc24f4291ddcad10bfc0b81a85d70203283607d0ad92265");
-const IC1_transfer: Slice = rawSlice("821b05a46f903dcc9595016cfefd3866b63d09221bc723723dbeedd539f98e06af56091d8ae12bc9a1bed7a3a9b1984a");
-const IC2_transfer: Slice = rawSlice("950c0c9007bdd92f264f36489312b5f53acf60064014173ebacdac53ede4c311e272af063da3b0d68a8ac908bb018a39");
-const IC3_transfer: Slice = rawSlice("ac2ad0368ea10d4f355272829eb9d7389c76bf09ce0e704b1081fd588179752a72898ba57a1b871526c057f222edcdc3");
-const IC4_transfer: Slice = rawSlice("b2ff6ba8453a6fda1b0e2fffeac73e7770dedd73965544e6ecb0fedeb0c8721a0db3bc947a8a523a1ddbdac0c3d4452c");
+const IC0_transfer: Slice = rawSlice("b1a5d575016ed2d6d24ca4d530e49f4bdf8d6cbd8a9afd276f9aeb5e64c6288518d046ea1d5964f2e85798e9f8316cd4");
+const IC1_transfer: Slice = rawSlice("b9052348b8d739bb38406901ec58e4c06c62091bbc42758471fcb53cbed292c3530c33e40a038f8b8c67da1f30a6c718");
+const IC2_transfer: Slice = rawSlice("999c6b2bc21382c8f9963c832d85cf289699eaa6a53f9a707b29246cd3541e9737ca0ee7b7db2750b4daa3a068f98b55");
+const IC3_transfer: Slice = rawSlice("a646008d4b35ee86eb5f4098fbe9f36304550191060ecdef3908788a6a2782eb4ccc22aa29c87fb674ba47ba8a9272a7");
+const IC4_transfer: Slice = rawSlice("9539c5def64aa719daf34479ab43d3fb4e43a97620e90d94f78280128380ad3ffcafd5fe40a899027620bcaacaaef02e");
 
 trait VerifierTransfer {
     fun groth16Verify_transfer(
     piA: Slice,
     piB: Slice,
     piC: Slice,
-    pubInputs: map<Int as uint32, Int as uint224>
+    pubInputs: map<Int as uint32, Int as uint256>
     ): Bool {
         // --- acc = Σ(v_i * IC_{i+1}) (ONLY public-dependent part) ---
         let haveAcc: Bool = false;
@@ -56,7 +56,7 @@ trait VerifierTransfer {
     piA: Slice,
     piB: Slice,
     piC: Slice,
-    pubInputs: map<Int as uint32, Int as uint224>
+    pubInputs: map<Int as uint32, Int as uint256>
     ): Bool {
         return self.groth16Verify_transfer(piA, piB, piC, pubInputs);
     }

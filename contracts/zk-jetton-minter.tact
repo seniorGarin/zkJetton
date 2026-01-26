@@ -1,52 +1,82 @@
+import "@stdlib/ownable";
+
 import "./zk-jetton-wallet";
 import "./common/messages";
 
 import "./verifiers_traits/verifier_mint";
 
-struct ZkJettonMinterState {
-    mintable: Bool;
-    adminAddress: Address;
+contract ZkJettonMinter  with MintVerifier, Ownable {
+    owner: Address;
     jettonContent: Cell;
+    mintable: Bool;
     jettonWalletCode: Cell;
-}
+    nonce: Int as uint64;
 
-contract ZkJettonMinter(
-    owner: Address,
-    jettonContent: Cell,
-    mintable: Bool,
-) with MintVerifier {
+    init(
+        owner: Address,
+        jettonContent: Cell,
+        mintable: Bool
+    ) {
+        self.owner = owner;
+        self.jettonContent = jettonContent;
+        self.mintable = mintable;
+        self.jettonWalletCode = codeOf ZkJettonWallet;
+        self.nonce = 0;
+    }
+
     receive(msg: Mint) {
-        require(sender() == self.owner, "Incorrect sender");
+        let ctx = context();
+        require(ctx.value >= ton("0.1"), "Insufficient fee for ZK verification");
         require(self.mintable, "Mint is closed");
-        require(self.groth16Verify_mint(
-            msg.piA, msg.piB, msg.piC, msg.pubInputs
-        ), "Invalid proof");
+        require(self.owner == ctx.sender, "Receiver must be sender");
+        require(msg.nonce == self.nonce, "Invalid nonce");
+        require(self.groth16Verify_mint(msg.piA, msg.piB, msg.piC, msg.pubInputs), "Invalid ZK proof");
+
+        let proofNonce = msg.pubInputs.get(4)!!;
+        require(proofNonce == self.nonce, "Invalid proof nonce");
+
+        let proofReceiverHash = msg.pubInputs.get(3)!!;
+        require(proofReceiverHash == sha256(msg.receiver.toString()), "Invalid proof nonce");
+
+        self.nonce += 1;
 
         message(MessageParameters {
             to: getZkJettonWalletByOwner(msg.receiver),
-            value: 0,
-            mode: SendRemainingValue,
+            value: ton("0.05"),
+            mode: 0,
             bounce: false,
             body: msg.mintMessage.toCell(),
         });
     }
 
     receive(msg: ZkJettonUpdateContent) {
-        require(sender() == self.owner, "Incorrect sender");
+        self.requireOwner();
         self.jettonContent = msg.content;
+        emit("ZkJettonMinter:ZkJettonUpdateContent".asComment())
     }
 
-    get fun get_jetton_data(): ZkJettonMinterState {
+    receive(msg: UpdateMintable) {
+        self.requireOwner();
+        self.mintable = msg.newMintable;
+        emit("ZkJettonMinter:UpdateMintable".asComment())
+    }
+
+    get fun jetton_data(): ZkJettonMinterState {
         return ZkJettonMinterState {
             mintable: self.mintable,
-            adminAddress: self.owner,
+            ownerAddress: self.owner,
             jettonContent: self.jettonContent,
             jettonWalletCode: codeOf ZkJettonWallet,
+            nonce: self.nonce,
         };
     }
 
     get fun wallet_address(ownerAddress: Address): Address {
         return getZkJettonWalletByOwner(ownerAddress);
+    }
+
+    get fun nonce(): Int {
+        return self.nonce;
     }
 }
 

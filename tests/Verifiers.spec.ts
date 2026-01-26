@@ -9,9 +9,7 @@ import { Verifier as Registration_Verifier } from '../build/verifiers/VerifierRe
 import { Verifier as Mint_Verifier } from '../build/verifiers/VerifierMint_Verifier';
 import { Verifier as Transfer_Verifier } from '../build/verifiers/VerifierTransfer_Verifier';
 
-import { createRegistrationProof } from './helpers/registration';
-import { createMintProof } from './helpers/mint';
-import { createTransferProof } from './helpers/transfer';
+import { createMintProof, createRegistrationProof, createTransferProof } from './helpers';
 
 // npx blueprint test Verifiers
 describe('Verifiers', () => {
@@ -76,7 +74,7 @@ describe('Verifiers', () => {
     });
 
     it('Mint proof', async () => {
-        const { proof, publicSignals } = await createMintProof(keys1);
+        const { proof, publicSignals } = await createMintProof(keys1, 1n, user1.address);
         const { pi_a, pi_b, pi_c, pubInputs } = await groth16CompressProof(proof, publicSignals);
 
         expect(

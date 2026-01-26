@@ -2,13 +2,13 @@ import paillierBigint from 'paillier-bigint';
 import * as snarkjs from 'snarkjs';
 import path from 'path';
 
+import { beginCell, toNano } from '@ton/core';
 import { SandboxContract, TreasuryContract } from '@ton/sandbox';
 
 import { dictFromInputList, groth16CompressProof } from 'export-ton-verifier';
 
-import { getRandomBigInt, initBalance } from './common';
+import { getRandomBigInt, initBalance } from './index';
 import { ZkJettonWallet } from '../../build/zkJettonMinter/zkJettonMinter_ZkJettonWallet';
-import { beginCell, toNano } from '@ton/core';
 
 const wasmPath = path.join(__dirname, '../../circuits/registration/registration_js', 'registration.wasm');
 const zkeyPath = path.join(__dirname, '../../circuits/registration', 'registration_final.zkey');

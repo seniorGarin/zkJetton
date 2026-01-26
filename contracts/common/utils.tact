@@ -8,13 +8,23 @@ const ERR_TOO_MANY_PUBLICS: Int = 258;
 const ERR_INDEX_OUT_OF_RANGE: Int = 259;
 const ERR_WRONG_PROOF: Int = 260;
 
+// Max uint
+const MAX_UINT224: Int = (1 << 224) - 1;
+const MAX_UINT64: Int = (1 << 64) - 1;
+
 // Safe getter for public inputs
-fun getPub(pubInputs: map<Int as uint32, Int as uint224>, k: Int): Int {
+fun getPub(pubInputs: map<Int as uint32, Int as uint256>, k: Int): Int {
   let v = pubInputs.get(k);
   if (v == null) {
     nativeThrow(ERR_PUBLIC_NOT_PRESENT);
   }
   return v!!;
+}
+
+fun isCoprimeWithNSquared(multiplier: Int, n: Int): Bool {
+  let n2 = n * n; // ✅ Корректное вычисление квадрата
+  let g = gcd(multiplier, n2);
+  return g == 1;
 }
 
 // ASM intrinsics
@@ -42,12 +52,20 @@ asm fun blsG1Multiexp_3(
   , n: Int
 ): Slice { BLS_G1_MULTIEXP }
 
-
 asm fun blsG1Multiexp_4(
   x1: Slice, y1: Int,
   x2: Slice, y2: Int,
   x3: Slice, y3: Int,
   x4: Slice, y4: Int
+  , n: Int
+): Slice { BLS_G1_MULTIEXP }
+
+asm fun blsG1Multiexp_5(
+  x1: Slice, y1: Int,
+  x2: Slice, y2: Int,
+  x3: Slice, y3: Int,
+  x4: Slice, y4: Int,
+  x5: Slice, y5: Int
   , n: Int
 ): Slice { BLS_G1_MULTIEXP }
 
@@ -81,3 +99,17 @@ fun modInverse(a: Int, m: Int): Int {
 
   return t;
 }
+
+fun gcd(a: Int, b: Int): Int {
+  let x = abs(a);
+  let y = abs(b);
+
+  while (y != 0) {
+    let t = x % y;
+    x = y;
+    y = t;
+  }
+
+  return x;
+}
+

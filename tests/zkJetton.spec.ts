@@ -1,15 +1,12 @@
 import { Blockchain, SandboxContract, TreasuryContract } from '@ton/sandbox';
-import { beginCell, toNano } from '@ton/core';
+import { beginCell, Cell, toNano } from '@ton/core';
 import '@ton/test-utils';
 
 import paillierBigint from 'paillier-bigint';
 
 import { ZkJettonMinter } from '../build/zkJettonMinter/zkJettonMinter_ZkJettonMinter';
 import { ZkJettonWallet } from '../build/zkJettonMinter/zkJettonMinter_ZkJettonWallet';
-import { registration } from './helpers/registration';
-import { mint } from './helpers/mint';
-import { transfer } from './helpers/transfer';
-import { transferWithBounce } from './helpers/transferWithBounce';
+import { mint, registration, transfer, transferWithBounce } from './helpers';
 
 // npx blueprint test zkJetton.spec.ts
 describe('zkJetton', () => {
@@ -38,6 +35,10 @@ describe('zkJetton', () => {
         await transfer(keys1, keys2, zkJettonWalletUser1, zkJettonWalletUser2, user1, user2);
     }
 
+    async function transferWithBouncePhase() {
+        await transferWithBounce(keys1, keys2, zkJettonWalletUser1, user1, blockchain);
+    }
+
     beforeEach(async () => {
         blockchain = await Blockchain.create();
         owner = await blockchain.treasury('owner');
@@ -48,7 +49,7 @@ describe('zkJetton', () => {
         keys2 = await paillierBigint.generateRandomKeys(32);
 
         zkJettonMinter = blockchain.openContract(
-            await ZkJettonMinter.fromInit(owner.address, beginCell().endCell(), true),
+            await ZkJettonMinter.fromInit(owner.address, Cell.EMPTY, true),
         );
         zkJettonWalletUser1 = blockchain.openContract(
             await ZkJettonWallet.fromInit(user1.address, zkJettonMinter.address, 0n),
@@ -78,8 +79,8 @@ describe('zkJetton', () => {
     });
 
     it('zkJettonMinter deploy', async () => {
-        expect((await zkJettonMinter.getGetJettonData()).adminAddress.equals(owner.address)).toBe(true);
-        expect((await zkJettonMinter.getGetJettonData()).mintable).toBe(true);
+        expect((await zkJettonMinter.getJettonData()).ownerAddress.equals(owner.address)).toBe(true);
+        expect((await zkJettonMinter.getJettonData()).mintable).toBe(true);
     });
 
     it('Registration', async () => {
@@ -100,6 +101,6 @@ describe('zkJetton', () => {
     it('Transfer bounced reverts balance', async () => {
         await registrationPhase();
         await mintPhase();
-        await transferWithBounce(keys1, keys2, zkJettonWalletUser1, user1, blockchain);
+        await transferWithBouncePhase();
     });
 });

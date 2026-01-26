@@ -1,10 +1,12 @@
 import paillierBigint from 'paillier-bigint';
-import { SandboxContract, TreasuryContract, Blockchain } from '@ton/sandbox';
-import { ZkJettonWallet } from '../../build/zkJettonMinter/zkJettonMinter_ZkJettonWallet';
-import { dictFromInputList, groth16CompressProof } from 'export-ton-verifier';
-import { beginCell, toNano } from '@ton/core';
 
-import { createTransferProof } from './transfer'; // можно вынести в общий файл, чтобы не дублировать
+import { beginCell, toNano } from '@ton/core';
+import { SandboxContract, TreasuryContract, Blockchain } from '@ton/sandbox';
+import { dictFromInputList, groth16CompressProof } from 'export-ton-verifier';
+
+import { ZkJettonWallet } from '../../build/zkJettonMinter/zkJettonMinter_ZkJettonWallet';
+
+import { createTransferProof } from './index';
 
 export async function transferWithBounce(
     keys1: paillierBigint.KeyPair,

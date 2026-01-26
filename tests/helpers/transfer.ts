@@ -3,11 +3,11 @@ import * as snarkjs from 'snarkjs';
 import path from 'path';
 
 import { SandboxContract, TreasuryContract } from '@ton/sandbox';
-
-import { getRandomBigInt, transferValue } from './common';
-import { ZkJettonWallet } from '../../build/zkJettonMinter/zkJettonMinter_ZkJettonWallet';
-import { dictFromInputList, groth16CompressProof } from 'export-ton-verifier';
 import { beginCell, toNano } from '@ton/core';
+import { dictFromInputList, groth16CompressProof } from 'export-ton-verifier';
+
+import { getRandomBigInt, transferValue } from './index';
+import { ZkJettonWallet } from '../../build/zkJettonMinter/zkJettonMinter_ZkJettonWallet';
 
 const wasmPath = path.join(__dirname, '../../circuits/transfer/transfer_js', 'transfer.wasm');
 const zkeyPath = path.join(__dirname, '../../circuits/transfer', 'transfer_final.zkey');
@@ -30,7 +30,7 @@ export async function transfer(
         keys1,
         keys2,
         zkJettonWallet1Data.balance,
-        zkJettonWallet1Data.nonce,
+        zkJettonWallet2Data.nonce,
     );
     const { pi_a, pi_b, pi_c, pubInputs } = await groth16CompressProof(proof, publicSignals);
 
@@ -108,10 +108,10 @@ export function getTransferData(
     const senderPrivKey = [senderKeys.privateKey.lambda, senderKeys.privateKey.mu, senderKeys.privateKey.n];
 
     return {
+        nonce: receiverNonce,
         encryptedSenderBalance,
         encryptedSenderValue,
         encryptedReceiverValue,
-        nonce: receiverNonce,
         value,
         senderPubKey,
         receiverPubKey,

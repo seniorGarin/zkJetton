@@ -1,33 +1,56 @@
 pragma circom 2.2.1;
 
 include "binpower.circom";
+include "../node_modules/circomlib/circuits/comparators.circom"; // GreaterThan и LessThan
 
 template Main() {
-	signal input encryptedValue;
-	signal input value;
-	// public key: g, rand r, n
-	signal input receiverPubKey[3];
-	
-	// value cannot be negative
-	assert(value > 0);
+    signal input encryptedValue;
+    signal input receiverG;
+    signal input receiverN;
+    signal input receiverHash;
 
-	// payment encryption check
-	component pow1 = Binpower();
-	component pow2 = Binpower();
+    signal input nonce;
+    signal input amount;
+    signal input r;
+    signal input q; // witness
 
-	pow1.b <== receiverPubKey[0];
-	pow1.e <== value;
-	pow1.modulo <== receiverPubKey[2] * receiverPubKey[2];
+    // amount > 0
+    component gtZero = GreaterThan(128);
+    gtZero.in[0] <== amount;
+    gtZero.in[1] <== 0;
+    gtZero.out === 1;
 
-	pow2.b <== receiverPubKey[1];
-	pow2.e <== receiverPubKey[2];
-	pow2.modulo <== receiverPubKey[2] * receiverPubKey[2];
+    signal n2;
+    n2 <== receiverN * receiverN;
 
-	signal enValue <-- (pow1.out * pow2.out) % (receiverPubKey[2] * receiverPubKey[2]);
-	encryptedValue === enValue;
+    component powG = Binpower();
+    powG.b <== receiverG;
+    powG.e <== amount;
+    powG.modulo <== n2;
+
+    component powR = Binpower();
+    powR.b <== r;
+    powR.e <== receiverN;
+    powR.modulo <== n2;
+
+    signal product;
+    product <== powG.out * powR.out;
+
+    signal rhs;
+    product === q * n2 + encryptedValue;
+
+    component lt = LessThan(252);
+    lt.in[0] <== encryptedValue;
+    lt.in[1] <== n2;
+    lt.out === 1;
 }
 
-// public data
 component main {
-		public [encryptedValue]		// calculates + send to mint function
-				} = Main();
+    public [
+        nonce,
+        encryptedValue,
+        receiverG,
+        receiverN,
+        receiverHash
+    ]
+} = Main();
